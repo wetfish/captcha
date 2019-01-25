@@ -14,7 +14,7 @@ function captcha()
             this.canvas.height = 150;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-            this.interval = setInterval(updateCanvas, 20);
+            this.refreshrate = setInterval(updateCanvas, 24);
         },
         clear : function() 
         {
@@ -55,7 +55,7 @@ function captcha()
     {
         if (xhr.readyState == 4 && xhr.status == 200)
         {
-            var response = xhr.responseText;
+            var response = xhr.re;
 
             }
         }

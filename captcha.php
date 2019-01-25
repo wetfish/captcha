@@ -6,13 +6,16 @@ final class captcha
 
     function __construct()
     {
-        if(!isset($_SESSION[$randomID])) generateID();
-        Header("Content-type: image/png");
-        if(!isset($_SESSION[$layers_sent]))
-        {
+        if(!isset($_SESSION[$randomID])){
+            generateID();
             generateCaptcha();
+        } 
+        else
+        {
+            $_SESSION[$mousePosition] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
+            checkSuccess();
         }
-        $_SESSION[$mousePosition] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
+        
     }
 
     private function generateID()
@@ -71,9 +74,9 @@ final class captcha
         {
             if($i>1)
             {
-                foreach($fishes as $f)
+                foreach($fishes as $fish)
                 {
-                    imageflip($f, $IMG_FLIP_HORIZONTAL);
+                    imageflip($fish, $IMG_FLIP_HORIZONTAL);
                 }
             } 
             foreach($_SESSION[$randomID[$fish]] as $fishy)
@@ -96,10 +99,10 @@ final class captcha
                 }
             }
         }
+        Header("Content-type: image/png");
         foreach($layers as $img)
         {
             imagepng($img);
-            $_SESSION[$layers_sent] = true;
             imagedestroy($img);
         }
     }
