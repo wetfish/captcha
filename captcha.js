@@ -18,17 +18,8 @@ function captcha(){
         }
     }
 
-    function Fish(x, y, size, left, trait){
-        this.x = x;
-        this.y = x;
-        this.size = size;
-        this.left = left;
-        this.trait = trait;
+    function layer(){
         this.sprite = new Image();
-
-        this.speed = 2;
-        if(trait == "fast"){this.speed = 4;}
-
         this.update = function(){
             if (this.left){ x -= speed;}
             else{ x += speed;}
@@ -39,9 +30,9 @@ function captcha(){
 
     function updateCanvas() {
         CaptchaElement.clear();
-        for (let i = 0; i < fishies.length; i++) {
-            fishies[i].update();
-        }
+        bg.update();
+        left.update();
+        right.update();
     }
 
     var xhr = new XMLHttpRequest();
