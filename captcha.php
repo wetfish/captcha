@@ -77,7 +77,8 @@ final class captcha{
             }
         }
         foreach($layers as $img){
-            image_png($img);
+            imagepng($img);
+            imagedestroy($img);
         }
     }
 }
