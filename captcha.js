@@ -1,6 +1,8 @@
 function captcha(){
 
-    var fishies;
+    var bg;
+    var left;
+    var right;
 
     this.CaptchaElement = {
         canvas : document.createElement("captcha"),
@@ -47,13 +49,10 @@ function captcha(){
     xhr.send();
     xhr.onreadystatechange = function(){
         if (xhr.readyState == 4 && xhr.status == 200){
-            var response = JSON.parse(xhr.responseText);
-            for (let i = 0; i < response[0].length; i++) {
-                const ifish = response[i];
-                fishies[i] = Fish(ifish.x, ifish.y, ifish.size, ifish.left, ifish.trait);
+            var response = xhr.responseText;
+
             }
         }
-    }
 
     CaptchaElement.initialize();
 }
