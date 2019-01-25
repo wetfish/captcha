@@ -1,14 +1,18 @@
 <?php
-final class captcha
-{
-
 //This class requires a session to be created on the page and does not create its own
 
+session_start();
+
+$captcha = new captcha;
+
+class captcha
+{
     function __construct()
     {
+        echo "am i dead?";
         if(!isset($_SESSION[$randomID])){
-            generateID();
-            generateCaptcha();
+            $captcha->generateID();
+            captcha::generateCaptcha();
         } 
         else
         {
@@ -46,6 +50,8 @@ final class captcha
                 $generatedID['challenge'] = 'striped';
                 break;
         }
+        Header('Content-type: text');
+        echo $generatedID;
         
         return $generatedID;
     }
@@ -105,6 +111,11 @@ final class captcha
             imagepng($img);
             imagedestroy($img);
         }
+    }
+
+    private function checkSuccess()
+    {
+
     }
 }
     
