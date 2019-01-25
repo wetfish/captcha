@@ -6,7 +6,7 @@ final class captcha{
     function __construct(){
         if (!isset($_SESSION[$randomID])) generateID();
         Header("Content-type: image/png");
-        generateCaptcha();
+        if(!isset($_SESSION[$layers_sent])||($_SESSION[$layers_sent])==false){generateCaptcha();}
         $_SESSION[$mousePosition] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
     }
 
@@ -78,6 +78,7 @@ final class captcha{
         }
         foreach($layers as $img){
             imagepng($img);
+            $_SESSION[$layers_sent] = true;
             imagedestroy($img);
         }
     }
