@@ -1,17 +1,24 @@
 <?php
-final class captcha{
+final class captcha
+{
 
 //This class requires a session to be created on the page and does not create its own
 
-    function __construct(){
-        if (!isset($_SESSION[$randomID])) generateID();
+    function __construct()
+    {
+        if(!isset($_SESSION[$randomID])) generateID();
         Header("Content-type: image/png");
-        if(!isset($_SESSION[$layers_sent])||($_SESSION[$layers_sent])==false){generateCaptcha();}
+        if(!isset($_SESSION[$layers_sent]))
+        {
+            generateCaptcha();
+        }
         $_SESSION[$mousePosition] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
     }
 
-    private function generateID(){
-        $generatedID = [
+    private function generateID()
+    {
+        $generatedID = 
+        [
             'challenge' => null, // Possible options: smallest, biggest, striped
             'generated_at' => date('m/d/Y h:i:s', time()),
             'fish' =>
@@ -24,7 +31,8 @@ final class captcha{
             ]
         ];
 
-        switch (rand(0,99)%3){
+        switch (rand(0,99)%3)
+        {
             case 0:
                 $generatedID['challenge'] = 'smallest';
                 break;
@@ -39,13 +47,16 @@ final class captcha{
         return $generatedID;
     }
 
-    private function generateCaptcha(){
-        $layers = [
+    private function generateCaptcha()
+    {
+        $layers = 
+        [
             'bg' => imagecreatefrompng('./bglayer'),
             'left' => imagecreatetruecolor(420, 240),
             'right' => imagecreatetruecolor(420, 240)
         ];
-        $fishes = [
+        $fishes = 
+        [
             'normal' => imagecreatefrompng('./normal'),
             'striped' => imagecreatefrompng('./stripe')
         ];
@@ -56,10 +67,19 @@ final class captcha{
 
         imagestring($bg, $font, 25, 225, "Catch the " . $_SESSION[$randomID['challenge']] . " fish!", $textColor);
 
-        for ($i=1; $i <= 2; $i++) {
-            if($i>1)foreach($fishes as $f){imageflip($f, $IMG_FLIP_HORIZONTAL);} 
-            foreach($_SESSION[$randomID[$fish]] as $fishy){
-                switch(fishy['trait']){
+        for($i=1; $i <= 2; $i++) 
+        {
+            if($i>1)
+            {
+                foreach($fishes as $f)
+                {
+                    imageflip($f, $IMG_FLIP_HORIZONTAL);
+                }
+            } 
+            foreach($_SESSION[$randomID[$fish]] as $fishy)
+            {
+                switch(fishy['trait'])
+                {
                     case 'none':
                         imagecopy($layers[$i], $normal, fishy['x'], fishy['y'], 0, 0, $fish_w, $fish_h);
                         break;
@@ -76,7 +96,8 @@ final class captcha{
                 }
             }
         }
-        foreach($layers as $img){
+        foreach($layers as $img)
+        {
             imagepng($img);
             $_SESSION[$layers_sent] = true;
             imagedestroy($img);

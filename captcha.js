@@ -1,34 +1,47 @@
-function captcha(){
+function captcha()
+{
 
     var bg;
     var left;
     var right;
 
-    this.CaptchaElement = {
+    this.CaptchaElement = 
+    {
         canvas : document.createElement("captcha"),
-        initialize : function(){
+        initialize : function()
+        {
             this.canvas.width = 350;
             this.canvas.height = 150;
             this.context = this.canvas.getContext("2d");
             document.body.insertBefore(this.canvas, document.body.childNodes[0]);
             this.interval = setInterval(updateCanvas, 20);
         },
-        clear : function() {
+        clear : function() 
+        {
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
 
-    function layer(){
+    function layer()
+    {
         this.sprite = new Image();
-        this.update = function(){
-            if (this.left){ x -= speed;}
-            else{ x += speed;}
+        this.update = function()
+        {
+            if (this.left)
+            { 
+                x -= speed;
+            }
+            else
+            { 
+                x += speed;
+            }
             ctx = captchaElement.context;
             ctx.drawImage(this.sprite, x, y);
         }
     }
 
-    function updateCanvas() {
+    function updateCanvas() 
+    {
         CaptchaElement.clear();
         bg.update();
         left.update();
@@ -38,8 +51,10 @@ function captcha(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', "https://wiki.wetfish.net/captcha.php", true);
     xhr.send();
-    xhr.onreadystatechange = function(){
-        if (xhr.readyState == 4 && xhr.status == 200){
+    xhr.onreadystatechange = function()
+    {
+        if (xhr.readyState == 4 && xhr.status == 200)
+        {
             var response = xhr.responseText;
 
             }
