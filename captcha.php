@@ -7,16 +7,17 @@ $captcha = new captcha(); //temporary constructor for testing purposes
 class captcha
 {
     function __construct()
-    {
-        echo 'dead for sure';
+    {   
+        $_SESSION['randomID']=$this->generateID();
+        $this->generateCaptcha();
         if(!isset($_SESSION['randomID'])) //checks to see if the captcha has already been created
         {
-            $_SESSION['randomID']=$this->generateID();
-            $this->generateCaptcha();
+            
+            
         } 
         else //if session has been created, it polls for the mouse position and checks to see if the success condition has been met yet
         {
-            $_SESSION['mousePosition'] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
+            //$_SESSION['mousePosition'] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
             //checkSuccess();
         }
         
@@ -30,11 +31,11 @@ class captcha
             'generated_at' => date('m/d/Y h:i:s', time()),
             'fish' =>
             [
-                ['size' => 1, 'trait' => 'none', 'x' => 20, 'y' => 40, 'left' => true],
+                ['size' => 1, 'trait' => 'none', 'x' => 300, 'y' => 40, 'left' => true],
                 ['size' => 3, 'trait' => 'striped', 'x' => 10, 'y' => 60, 'left' => true],
-                ['size' => 2, 'trait' => 'none', 'x' => 20, 'y' => 90, 'left' => false],
-                ['size' => 4, 'trait' => 'none', 'x' => 50, 'y' => 10, 'left' => true],
-                ['size' => 2, 'trait' => 'dead', 'x' => 80, 'y' => 20, 'left' => false],
+                ['size' => 2, 'trait' => 'none', 'x' => 200, 'y' => 90, 'left' => false],
+                ['size' => 4, 'trait' => 'none', 'x' => 100, 'y' => 10, 'left' => true],
+                ['size' => 2, 'trait' => 'dead', 'x' => 30, 'y' => 20, 'left' => false],
             ]
         ];
 
@@ -57,58 +58,78 @@ class captcha
 
     private function generateCaptcha()
     {
+        $fishImages = 
+        [
+            0 => imagecreatefrompng('./normal.png'),
+            1 => imagecreatefrompng('./stripe.png')
+        ];
         $layers = 
         [
-            'bg' => imagecreatefrompng('./bglayer.png'),
-            'left' => imagecreatetruecolor(420, 240),
-            'right' => imagecreatetruecolor(420, 240)
+            0 => imagecreatefrompng('./bglayer.png'),
+            1 => imagecreatetruecolor(420, 240),
+            2 => imagecreatetruecolor(420, 240)
         ];
-        $fishes = 
-        [
-            'normal' => imagecreatefrompng('./normal.png'),
-            'striped' => imagecreatefrompng('./stripe.png')
-        ];
-        $font = imageloadfont('./dpcomic.ttf');
-        $textColor = imagecolorallocate($layers['bg'], 160, 15, 150);
-        $fish_w = 96;
-        $fish_h = 54;
 
-        imagestring($layers['bg'], $font, 25, 225, "Catch the " . $_SESSION['randomID']['challenge'] . " fish!", $textColor);
+        //imagettfbox(30, 0, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
+        $textColor = imagecolorallocate($layers[0], 160, 15, 150);
+        $font = imagettftext($layers[0], 30, 0, 20, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
+        Header("Content-type: image/png");
         for($i=1; $i <= 2; $i++) 
-        {
+        {   
+            imagealphablending($layers[$i],false);
+            $transparency = imagecolorallocatealpha($layers[$i], 0, 0, 0, 127);
+            imagefilledrectangle($layers[$i], 0, 0, 420, 240, $transparency);
+            imagealphablending($layers[$i],true);
+            imagesavealpha($layers[$i], true);
+            
             if($i>1)
             {
-                foreach($fishes as $fish)
+                for($j=0; $j<count($fishImages); $j++)
                 {
-                    imageflip($fish, IMG_FLIP_HORIZONTAL);
+                    imageflip($fishImages[$j], IMG_FLIP_HORIZONTAL);
                 }
             } 
             foreach($_SESSION['randomID']['fish'] as $fishy)
             {
-                switch($fishy['trait'])
+                if($i==1 && !$fishy['left'])
                 {
-                    case 'none':
-                        imagecopy($layers[$i], $normal, $fishy['x'], $fishy['y'], 0, 0, $fish_w, $fish_h);
-                        break;
-                    case 'striped':
-                        imagecopy($layers[$i], $striped, $fishy['x'], $fishy['y'], 0, 0, $fish_w, $fish_h);
-                        break;
-                    case 'big':
-                        imagecopyresized($layers[$i], $normal, $fishy['x'], $fishy['y'], 0, 0, floor($fish_h*1.5), floor($fish_h*1.5),$fish_w, $fish_h);
-                        break;
-                    case 'dead':
-                        $deadfish = imageflip($normal, IMG_FLIP_VERTICAL);
-                        imagecopy($layers[$i], $deadfish, $fishy['x'], $fishy['y'], 0, 0, $fish_w, $fish_h);
-                        break;
+                    $this -> drawFish($fishImages, $layers[$i], $fishy);
+                }
+                if($i==2 && $fishy['left'])
+                {
+                    $this -> drawFish($fishImages, $layers[$i], $fishy);
                 }
             }
+            
         }
-        Header("Content-type: image/png");
         foreach($layers as $img)
         {
             imagepng($img);
             imagedestroy($img);
+        }
+    }
+
+    private function drawFish($fishImages, $layer, $fishy){
+        $fish_width = 96;
+        $fish_height = 54;
+        switch($fishy['trait'])
+        {
+            case 'none':
+                imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+                break;
+            case 'striped':
+                imagecopy($layer, $fishImages[1], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+                break;
+            case 'big':
+                imagecopyresized($layers, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0,
+                floor($fish_height*1.5), floor($fish_height*1.5),$fish_width, $fish_height);
+                break;
+            case 'dead':
+                imageflip($fishImages[0], IMG_FLIP_VERTICAL);
+                imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+                imageflip($fishImages[0], IMG_FLIP_VERTICAL);
+                break;
         }
     }
 
