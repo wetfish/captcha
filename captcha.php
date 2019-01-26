@@ -74,7 +74,7 @@ class captcha
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
         $font = imagettftext($layers[0], 30, 0, 20, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
-        Header("Content-type: image/png");
+        //Header("Content-type: image/png");
         for($i=1; $i <= 2; $i++) 
         {   
             imagealphablending($layers[$i],false);
@@ -105,7 +105,9 @@ class captcha
         }
         foreach($layers as $img)
         {
-            imagepng($img);
+            ob_start(); 
+            imagepng($img); // echo this to javascript or whatever 
+            $data = base64_encode(ob_get_contents()); ob_end_clear();
             imagedestroy($img);
         }
     }

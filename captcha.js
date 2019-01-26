@@ -7,13 +7,13 @@ function captcha()
 
     this.CaptchaElement = 
     {
-        canvas : document.createElement("captcha"),
+        canvas : document.createElement('canvas'),
         initialize : function()
         {
-            this.canvas.width = 350;
-            this.canvas.height = 150;
+            this.canvas.width = 420;
+            this.canvas.height = 240;
             this.context = this.canvas.getContext("2d");
-            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+            document.body.appendChild(this.canvas);
             this.refreshrate = setInterval(updateCanvas, 24);
         },
         clear : function() 
@@ -47,18 +47,16 @@ function captcha()
         left.update();
         right.update();
     }
+    CaptchaElement.initialize();
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', "https://wiki.wetfish.net/captcha.php", true);
+    xhr.open('GET', "./captcha.php", true);
     xhr.send();
     xhr.onreadystatechange = function()
     {
         if (xhr.readyState == 4 && xhr.status == 200)
         {
-            var response = xhr.re;
-
-            }
+            
         }
-
-    CaptchaElement.initialize();
+    }
 }
