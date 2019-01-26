@@ -4,6 +4,7 @@ function captcha()
     var bg;
     var left;
     var right;
+    const speed = 2;
 
     this.CaptchaElement = 
     {
@@ -22,21 +23,23 @@ function captcha()
         }
     }
 
-    function layer()
+    function layer(layer, left)
     {
-        this.sprite = new Image();
+        this.layer = layer;
+        this.left = left;
+        this.x = 0;
         this.update = function()
         {
             if (this.left)
             { 
-                x -= speed;
+                this.x -= speed;
             }
             else
             { 
-                x += speed;
+                this.x += speed;
             }
             ctx = captchaElement.context;
-            ctx.drawImage(this.sprite, x, y);
+            ctx.drawImage(this.sprite, this.x, 60);
         }
     }
 
@@ -55,8 +58,13 @@ function captcha()
     xhr.onreadystatechange = function()
     {
         if (xhr.readyState == 4 && xhr.status == 200)
-        {
+        {   
+            var reader = new FileReader();
+            var response = JSON.parse(xhr.responseText);
             
+            bg = reader.readAsDataURL(response.background);
+            left = layer(reader.readAsDataURL(response.left), true);
+            right = layer(reader.readAsDataURL(response.right), false);
         }
     }
 }
