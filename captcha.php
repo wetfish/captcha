@@ -52,7 +52,6 @@ class captcha
                 $generatedID['challenge'] = 'striped';
                 break;
         }
-        Header('Content-type: text');
         return $generatedID;
     }
 
@@ -74,7 +73,7 @@ class captcha
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
         $font = imagettftext($layers[0], 30, 0, 20, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
-        //Header("Content-type: image/png");
+        
         for($i=1; $i <= 2; $i++) 
         {   
             imagealphablending($layers[$i],false);
@@ -103,13 +102,14 @@ class captcha
             }
             
         }
-        foreach($layers as $img)
-        {
-            ob_start(); 
-            imagepng($img); // echo this to javascript or whatever 
-            $data = base64_encode(ob_get_contents()); ob_end_clear();
-            imagedestroy($img);
-        }
+        Header("Content-type: application/json");
+        $response_json = array
+        (
+            'background' => captcha::getLayerBase64($layers[0]),
+            'right' => captcha::getLayerBase64($layers[1]),
+            'left' => captcha::getLayerBase64($layers[2])
+        );
+        echo json_encode($response_json);
     }
 
     private function drawFish($fishImages, $layer, $fishy){
@@ -133,6 +133,15 @@ class captcha
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 break;
         }
+    }
+
+    private static function getLayerBase64($img){
+        ob_start(); 
+        imagepng($img);
+        $data = base64_encode(ob_get_contents());
+        ob_end_clear();
+        imagedestroy($img);
+        return 'data:image/png;base64,' . $data;
     }
 
     private function checkSuccess()
