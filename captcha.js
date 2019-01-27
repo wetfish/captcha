@@ -53,7 +53,7 @@ function captcha()
     CaptchaElement.initialize();
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', "./captcha.php", true);
+    xhr.open('GET', "file:///home/pmk/Documents/captcha/captcha/captcha.php", true);
     xhr.send();
     xhr.onreadystatechange = function()
     {
