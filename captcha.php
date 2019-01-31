@@ -139,7 +139,7 @@ class captcha
         ob_start(); 
         imagepng($img);
         $data = base64_encode(ob_get_contents());
-        ob_end_clear();
+        ob_end_clean();
         imagedestroy($img);
         return 'data:image/png;base64,' . $data;
     }
