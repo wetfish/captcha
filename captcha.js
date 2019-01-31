@@ -1,6 +1,5 @@
 function captcha()
 {
-
     var bg;
     var left;
     var right;
