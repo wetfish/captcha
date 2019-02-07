@@ -2,15 +2,15 @@ function captcha()
 {
     var maxFrameRate = 25;
 
-    var background = document.getElementById("bglayer");
+    var background = new Image();
     var left = 
     {
-        layer : document.getElementById("left"),
+        layer : new Image(),
         x : 0 //x position of bottom-leftmost pixel of the orignal layer on the canvas
     };
     var right = 
     {
-        layer: document.getElementById("right"),
+        layer: new Image(),
         x : 0
     };
 
@@ -56,23 +56,22 @@ function captcha()
             }, 1000/maxFrameRate);
         }
     }
-    canvasElement.initialize();
 
-
-
-    // var xhr = new XMLHttpRequest();
-    // xhr.open('GET', "/captcha.php", true);
-    // xhr.send();
-    // xhr.onreadystatechange = function()
-    // {
-    //     if (xhr.readyState == 4 && xhr.status == 200)
-    //     {   
-    //         var reader = new FileReader();
-    //         var response = JSON.parse(xhr.responseText);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "/captcha.php", true);
+    xhr.send();
+    xhr.onreadystatechange = function()
+    {
+        if (xhr.readyState == 4 && xhr.status == 200)
+        {   
+            var reader = new FileReader();
+            var response = JSON.parse(xhr.responseText);
             
-    //         bg = reader.readAsDataURL(response.background);
-    //         left = layer(reader.readAsDataURL(response.left), true);
-    //         right = layer(reader.readAsDataURL(response.right), false);
-    //     }
-    // }
+            background.src = response.background;
+            left.layer.src = response.left;
+            right.layer.src = response.right;
+        }
+    }
+
+    canvasElement.initialize();
 }
