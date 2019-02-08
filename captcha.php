@@ -26,17 +26,19 @@ class captcha
     private function generateID()
     {
         $challenges = array('striped', 'dead', 'backwards');
+        $traits = array('striped', 'dead', 'backwards', 'none');
+        $challenge = $challenges[array_rand($challenges)];
         $generatedID = //instantiate the random data for the captcha
         [
-            'challenge' => $challenges[array_rand($challenges)],
+            'challenge' => $challenge,
             'generated_at' => date('m/d/Y h:i:s', time()),
             'fish' =>
             [
-                ['size' => 1, 'trait' => 'none', 'x' => 300, 'y' => 40, 'left' => true],
-                ['size' => 3, 'trait' => 'striped', 'x' => 10, 'y' => 60, 'left' => true],
-                ['size' => 2, 'trait' => 'none', 'x' => 200, 'y' => 90, 'left' => false],
-                ['size' => 4, 'trait' => 'backwards', 'x' => 100, 'y' => 10, 'left' => true],
-                ['size' => 2, 'trait' => 'dead', 'x' => 30, 'y' => 20, 'left' => false],
+                ['trait' => $challenge, 'x' => rand(0,324), 'y' => rand(5,120), 'left' => (bool)rand(0,1)],
+                ['trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(5,120), 'left' => (bool)rand(0,1)],
+                ['trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(5,120), 'left' => (bool)rand(0,1)],
+                ['trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(5,120), 'left' => (bool)rand(0,1)],
+                ['trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(5,120), 'left' => (bool)rand(0,1)],
             ]
         ];
         
