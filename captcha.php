@@ -4,8 +4,10 @@
 session_start(); //temporary session for testing purposes
 $captcha = new captcha(); //temporary constructor for testing purposes
 
+
 class captcha
 {
+    
     function __construct()
     {   
         $_SESSION['randomID']=$this->generateID();
@@ -25,33 +27,21 @@ class captcha
 
     private function generateID()
     {
+        $challenges = array('striped', 'dead', 'backwards');
         $generatedID = //instantiate the random data for the captcha
         [
-            'challenge' => null, // Possible options: smallest, biggest, striped
+            'challenge' => $challenges[array_rand($challenges)],
             'generated_at' => date('m/d/Y h:i:s', time()),
             'fish' =>
             [
                 ['size' => 1, 'trait' => 'none', 'x' => 300, 'y' => 40, 'left' => true],
                 ['size' => 3, 'trait' => 'striped', 'x' => 10, 'y' => 60, 'left' => true],
                 ['size' => 2, 'trait' => 'none', 'x' => 200, 'y' => 90, 'left' => false],
-                ['size' => 4, 'trait' => 'none', 'x' => 100, 'y' => 10, 'left' => true],
+                ['size' => 4, 'trait' => 'backwards', 'x' => 100, 'y' => 10, 'left' => true],
                 ['size' => 2, 'trait' => 'dead', 'x' => 30, 'y' => 20, 'left' => false],
             ]
         ];
-
-        //this is some pretty stupid randomization that will be replaced with something more sensible
-        switch (rand(0,99)%3)
-        {
-            case 0:
-                $generatedID['challenge'] = 'smallest';
-                break;
-            case 1:
-                $generatedID['challenge'] = 'largest';
-                break;
-            case 2:
-                $generatedID['challenge'] = 'striped';
-                break;
-        }
+        
         return $generatedID;
     }
 
@@ -71,7 +61,7 @@ class captcha
 
         //imagettfbox(30, 0, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
-        $font = imagettftext($layers[0], 30, 0, 20, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
+        $font = imagettftext($layers[0], 30, 0, 15, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
         
         for($i=1; $i <= 2; $i++) 
@@ -131,6 +121,11 @@ class captcha
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
+                break;
+            case 'backwards':
+                imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
+                imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+                imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
                 break;
         }
     }
