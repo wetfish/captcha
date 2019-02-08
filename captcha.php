@@ -10,12 +10,10 @@ class captcha
     
     function __construct()
     {   
-        $_SESSION['randomID']=$this->generateID();
-        $this->generateCaptcha();
         if(!isset($_SESSION['randomID'])) //checks to see if the captcha has already been created
         {
-            
-            
+            $_SESSION['randomID']=$this->generateID();
+            $this->generateCaptcha();
         } 
         else //if session has been created, it polls for the mouse position and checks to see if the success condition has been met yet
         {
@@ -59,11 +57,9 @@ class captcha
             2 => imagecreatetruecolor(420, 240)
         ];
 
-        //imagettfbox(30, 0, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
         $font = imagettftext($layers[0], 30, 0, 15, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
-        
         for($i=1; $i <= 2; $i++) 
         {   
             imagealphablending($layers[$i],false);
@@ -97,7 +93,8 @@ class captcha
         (
             'background' => captcha::getLayerBase64($layers[0]),
             'right' => captcha::getLayerBase64($layers[1]),
-            'left' => captcha::getLayerBase64($layers[2])
+            'left' => captcha::getLayerBase64($layers[2]),
+            'welcome' => captcha::getLayerBase64(imagecreatefrompng('./welcome.png'))
         );
         echo json_encode($response_json);
     }
