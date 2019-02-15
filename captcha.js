@@ -63,8 +63,7 @@ function captcha()
     xhr.onreadystatechange = function()
     {
         if (xhr.readyState == 4 && xhr.status == 200)
-        {   
-            var reader = new FileReader();
+        {
             var response = JSON.parse(xhr.responseText);
             
             background.src = response.background;
