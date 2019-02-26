@@ -1,6 +1,6 @@
 function captcha()
 {
-    var maxFrameRate = 25;
+    var maxFrameRate = 25; 
 
     var background = new Image();
     var left = 
@@ -36,9 +36,11 @@ function captcha()
         },
         update : function()
         {
+            //TODO: will have to redo the movement so that the layers are moved with respect to time and not number of frames
+            //      so the positions can be calculated by the server without needing to pass it the number of frames drawn
             setTimeout(function()
             {
-                left.x -= 2;
+                left.x -= 2; //$pixelsPerFrame must equal these numbers in captcha.php
                 right.x += 2;
 
                 if(left.x<=-420){left.x = -1;}
