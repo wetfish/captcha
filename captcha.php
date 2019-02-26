@@ -4,7 +4,6 @@
 session_start(); //temporary session for testing purposes
 $captcha = new captcha(); //temporary constructor for testing purposes
 
-
 class captcha
 {
     
@@ -20,17 +19,19 @@ class captcha
             }
             $this->generateCaptcha();
         } 
-        else //if session has been created, it polls for the mouse position and checks to see if the success condition has been met yet
+        else //if session has been created, checks to see if the success condition has been met
         {
-            //$_SESSION['mousePosition'] = ['x' => $_GET["x"], 'y' => $_GET["y"]];
-            //checkSuccess();
+            if($this->checkSuccess())
+            {
+                //send success signal to client?
+            }
         }
         
     }
 
+    //generates a new and 'unique' random fish
     private function generateFish()
     {
-        
         $traits = array('striped', 'dead', 'backwards', 'none');
         $fishData = array('trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(2,120), 'left' => (bool)rand(0,1));
         
@@ -52,6 +53,7 @@ class captcha
         return $fishData;
     }
 
+    //checks to see if a hypothetical fish would overlap an existing fish
     private function overlaps($x, $y, $left)
     {
         foreach($_SESSION['randomID']['fish'] as $fishy){
@@ -68,6 +70,7 @@ class captcha
         return false;
     }
 
+    //generates randomID/captcha challenge
     private function generateID()
     {
         $challenges = array('striped', 'dead', 'backwards');
@@ -85,6 +88,7 @@ class captcha
         return $generatedID;
     }
 
+    //generates captcha data and sends it to client as a JSON
     private function generateCaptcha()
     {
         $fishImages = 
@@ -128,8 +132,8 @@ class captcha
                     $this -> drawFish($fishImages, $layers[$i], $fishy);
                 }
             }
-            
         }
+
         Header("Content-type: application/json");
         $response_json = array
         (
@@ -141,6 +145,7 @@ class captcha
         echo json_encode($response_json);
     }
 
+    //draws fish to respective layers
     private function drawFish($fishImages, $layer, $fishy){
         $fish_width = 96;
         $fish_height = 54;
@@ -169,6 +174,7 @@ class captcha
         }
     }
 
+    //converts a php gd image object to a base64 png
     private static function getLayerBase64($img){
         ob_start(); 
         imagepng($img);
@@ -177,10 +183,41 @@ class captcha
         imagedestroy($img);
         return 'data:image/png;base64,' . $data;
     }
-
+    
+    //returns true if user has dragged net and held over success fish for at least 3 seconds
     private function checkSuccess()
     {
+        $pixelsPerSec = 50; //corresponds to values (2 px) in capthca.js canvasElement.update() function and maxFPS (25fps)
 
+        if(!isset($_SESSION['mouse']))
+        {
+            $_SESSION['checkSuccess']['successTimer'] = 0; //initialize timer to keep track of how long the success condition has been true
+            $_SESSION['checkSuccess']['startTime'] = round(microtime(true) * 1000);
+        }
+        $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y'], 'net' => $_GET['net']]; //retrieve mouse/net dragging data (fish cannot be caught w/o net)
+        $targetFish = $_SESSION['randomID']['fish'][0];
+        $dxPos = ((round(microtime(true) * 1000) - $_SESSION['checkSuccess']['startTime']) * $pixelsPerSec); //magnitude of change in x position since start of challenge
+
+        $fishPos = //calculated position of the target fish
+        [
+            'x' => $targetFish['left'] ? $targetFish['x']-$dxPos % 420 : $targetFish['x']+$dxPos % 420, //xPos based on direction fish is moving
+            'y' => $targetFish['y']
+        ];
+
+        if($_SESSION['mouse']['net'] == 'true' //check to see if user has net and is over the target fish
+            && ($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96)
+            && ($_SESSION['mouse']['y'] >= $fishPos['y'] && $_SESSION['mouse']['y']-54 <= $fishPos['y']))
+        {
+            if($_SESSION['checkSuccess']['successTimer'] == 0){$_SESSION['checkSuccess']['successTimer'] = round(microtime(true) * 1000);} //if first success, start timer
+            elseif(round(microtime(true) * 1000) - $_SESSION['checkSuccess']['successTimer'] >= 2500) //else check timer (challenge success happens at 2.5 seconds)
+            {
+                return true;
+            }
+            else return false; //not yet 2.5 seconds, no success
+        }
+        else{$_SESSION['checkSuccess']['successTimer'] = 0;} //reset timer on fail
+
+        return false; //no success
     }
 }
 
