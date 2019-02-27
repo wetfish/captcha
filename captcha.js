@@ -25,7 +25,6 @@ function captcha()
 
     this.canvasElement = 
     {
-        lastUpdate : Date.now(),
         initialize : function()
         {
             canvas = document.createElement('canvas');
@@ -33,6 +32,7 @@ function captcha()
             canvas.height = 240;
             context = canvas.getContext("2d");
             document.body.prepend(canvas);
+            this.lastUpdate = Date.now();
             var tick = setInterval(canvasElement.update, 40);
         },
         update : function()
