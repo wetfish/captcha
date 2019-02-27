@@ -33,14 +33,13 @@ function captcha()
             canvas.height = 240;
             context = canvas.getContext("2d");
             document.body.prepend(canvas);
-            var tick = setInterval(this.update, 40);
+            var tick = setInterval(canvasElement.update, 40);
         },
         update : function()
         {
-            if(isNaN(this.lastUpdate)){this.lastUpdate = Date.now();}
             var now = Date.now();
-            var dt = now - this.lastUpdate;
-            this.lastUpdate = now;
+            var dt = now - canvasElement.lastUpdate;
+            canvasElement.lastUpdate = now;
             left.x -= 50.0*dt/1000; 
             right.x += 50.0*dt/1000;
 
