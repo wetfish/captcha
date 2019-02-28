@@ -14,11 +14,11 @@ function captcha()
         x : 0
     };
 
-    // var user = 
-    // {
-    //     x,
-    //     y
-    // }
+    var user = 
+    {
+        x : 0,
+        y : 0
+    }
 
     var canvas;
     var context;
@@ -31,7 +31,7 @@ function captcha()
             canvas.width = 420;
             canvas.height = 240;
             context = canvas.getContext("2d");
-            document.body.prepend(canvas);
+            document.getElementById("captcha").append(canvas);
             this.lastUpdate = Date.now();
             var tick = setInterval(canvasElement.update, 40);
         },
