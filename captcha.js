@@ -14,12 +14,6 @@ function captcha()
         x : 0
     };
 
-    var user = 
-    {
-        x : 0,
-        y : 0
-    }
-
     var canvas;
     var context;
 
@@ -32,11 +26,19 @@ function captcha()
             canvas.width = 420;
             canvas.height = 240;
             context = canvas.getContext("2d"); //initialize context to draw to
-            captchaDiv.append(canvas); //insert canvas into page
 
-            //captchaDiv.onmousemove("updateCoords(event)"); //tracks mouse position
-            //captchaDiv.onmousedown("useNet(event)"); //handles when a user starts to drag net
-            //captchaDiv.onmouseup("dropNet(event)"); //handles when user stops dragging net
+            canvas.setAttribute("onmousemove", "updateCoords(event)"); //tracks mouse position
+            canvas.setAttribute("onmousedown", "useNet(event)"); //handles when a user starts to drag net
+            canvas.setAttribute("onmouseup", "dropNet(event)"); //handles when user stops dragging net
+            canvas.setAttribute("onmouseleave", "dropNet(event)"); //drops net if user enters/leaves element
+            canvas.setAttribute("onmouseenter", "dropNet(event)");
+
+            canvas.setAttribute("ontouchmove", "updateCoords(event)"); //same as above, but for touch events
+            canvas.setAttribute("ontouchstart", "useNet(event)");
+            canvas.setAttribute("ontouchend", "dropNet(event)");
+            canvas.setAttribute("ontouchcancel", "dropNet(event)");
+            
+            captchaDiv.append(canvas); //insert canvas into page
 
             this.lastUpdate = Date.now(); //initialize data for animation loop
             var tick = setInterval(canvasElement.update, 40); //start animation loop
@@ -79,4 +81,37 @@ function captcha()
     }
 
     canvasElement.initialize(); //build the challenge
+
+    
+}
+
+var user = 
+{
+    x : 0,
+    y : 0,
+    net : false //is user dragging net
+}
+
+function updateCoords(event)
+{
+    if(event.type == 'mousemove') //checks if interaction is with a mouse cursor or touch event
+    {
+        user.x = event.offsetX;
+        user.y = event.offsetY;
+    }
+    else
+    {
+        user.x = event.touches[0].offsetX;
+        user.Y = event.touches[0].offsetY;
+    }
+}
+
+function useNet(event)
+{
+    user.net = true;
+}
+
+function dropNet(event)
+{
+    user.net = false;
 }
