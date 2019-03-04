@@ -13,6 +13,11 @@ function captcha()
         layer: new Image(),
         x : 0
     };
+    var nets = 
+    {
+        loose: new Image(),
+        drag: new Image()
+    }
 
     var canvas;
     var context;
@@ -29,9 +34,9 @@ function captcha()
 
             canvas.setAttribute("onmousemove", "updateCoords(event)"); //tracks mouse position
             canvas.setAttribute("onmousedown", "useNet(event)"); //handles when a user starts to drag net
-            canvas.setAttribute("onmouseup", "dropNet(event)"); //handles when user stops dragging net
-            canvas.setAttribute("onmouseleave", "dropNet(event)"); //drops net if user enters/leaves element
-            canvas.setAttribute("onmouseenter", "dropNet(event)");
+            canvas.setAttribute("onmouseup", "dropNet(event, true)"); //handles when user stops dragging net
+            canvas.setAttribute("onmouseleave", "dropNet(event, false)"); //drops net if user enters/leaves element, and sets to invisible
+            canvas.setAttribute("onmouseenter", "dropNet(event, true)"); //drops net and sets to visible
 
             canvas.setAttribute("ontouchmove", "updateCoords(event)"); //same as above, but for touch events
             canvas.setAttribute("ontouchstart", "useNet(event)");
@@ -62,6 +67,12 @@ function captcha()
 
             context.drawImage(right.layer, 420-right.x, 0, right.x, 240, 0, 0, right.x, 240);
             context.drawImage(right.layer, 0, 0, 420-right.x, 240, right.x, 0, 420-right.x, 240);
+
+            if(user.inframe)
+            {
+                if(user.net) context.drawImage(nets.drag, user.x-nets.drag.width/2, user.y-nets.drag.height/3);
+                else context.drawImage(nets.loose, user.x-nets.loose.width/2, user.y-nets.drag.height/3);
+            }
         }
     }
 
@@ -77,6 +88,8 @@ function captcha()
             background.src = response.background; //extract image data from parsed json
             left.layer.src = response.left;
             right.layer.src = response.right;
+            nets.loose.src = response.loose;
+            nets.drag.src = response.drag;
         }
     }
 
@@ -87,6 +100,7 @@ function captcha()
 
 var user = 
 {
+    inframe : false,
     x : 0,
     y : 0,
     net : false //is user dragging net
@@ -111,7 +125,8 @@ function useNet(event)
     user.net = true;
 }
 
-function dropNet(event)
+function dropNet(event, inframe)
 {
     user.net = false;
+    user.inframe = inframe;
 }

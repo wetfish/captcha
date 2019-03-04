@@ -106,13 +106,27 @@ class captcha
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
         $font = imagettftext($layers[0], 30, 0, 15, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
+        $nets =
+        [
+            0 => imagecreatefrompng('./net1.png'),
+            1 => imagecreatefrompng('./net2.png')
+        ];
+
         for($i=1; $i <= 2; $i++) 
         {   
-            imagealphablending($layers[$i],false);
+            imagealphablending($layers[$i], false);
             $transparency = imagecolorallocatealpha($layers[$i], 0, 0, 0, 127);
             imagefilledrectangle($layers[$i], 0, 0, 420, 240, $transparency);
-            imagealphablending($layers[$i],true);
+            imagealphablending($layers[$i], true);
             imagesavealpha($layers[$i], true);
+
+            imagealphablending($nets[$i-1], false);
+            $transparency = imagecolorallocatealpha($nets[$i-1], 0, 0, 0, 127);
+            $temp = imagecreatefrompng('./net'.$i.'.png');
+            imagefilledrectangle($nets[$i-1], 0, 0, imagesx($nets[$i-1]), imagesy($nets[$i-1]), $transparency);
+            imagealphablending($nets[$i-1], true);
+            imagesavealpha($nets[$i-1], true);
+            imagecopy($nets[$i-1], $temp, 0, 0, 0, 0, imagesx($nets[$i-1]), imagesy($nets[$i-1]));
             
             if($i>1)
             {
@@ -140,7 +154,9 @@ class captcha
             'background' => captcha::getLayerBase64($layers[0]),
             'right' => captcha::getLayerBase64($layers[1]),
             'left' => captcha::getLayerBase64($layers[2]),
-            'welcome' => captcha::getLayerBase64(imagecreatefrompng('./welcome.png'))
+            'welcome' => captcha::getLayerBase64(imagecreatefrompng('./welcome.png')),
+            'loose' => captcha::getLayerBase64($nets[0]),
+            'drag' => captcha::getLayerBase64($nets[1])
         );
         echo json_encode($response_json);
     }
