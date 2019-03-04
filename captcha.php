@@ -1,30 +1,31 @@
 <?php
-//This class requires a session to be created on the page and does not create its own
-
-session_start(); //temporary session for testing purposes
-$captcha = new captcha(); //temporary constructor for testing purposes
+session_start();
+$captcha = new captcha();
 
 class captcha
 {
     
     function __construct()
     {   
-        if(!isset($_SESSION['randomID'])) //checks to see if the captcha has already been created
+        if($_GET['new']) unset($_SESSION['randomID']);
+        if(isset($_SESSION['randomID'])) //if session has been created, checks to see if the success condition has been met
+        {
+            Header("Content-type: text/plain");
+            if($this->checkSuccess())
+            {
+                echo 'true';
+                session_destroy();
+            }
+            echo 'false';
+        } 
+        else //generates new challenge
         {
             $_SESSION['randomID']=$this->generateID();
-            //echo(var_dump($_SESSION['randomID']));
             for($i = 1; $i <= 5; $i++) 
             {
                 array_push($_SESSION['randomID']['fish'], $this->generateFish());
             }
             $this->generateCaptcha();
-        } 
-        else //if session has been created, checks to see if the success condition has been met
-        {
-            if($this->checkSuccess())
-            {
-                //send success signal to client?
-            }
         }
         
     }
@@ -211,6 +212,7 @@ class captcha
             $_SESSION['checkSuccess']['startTime'] = round(microtime(true) * 1000);
         }
         $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y'], 'net' => $_GET['net']]; //retrieve mouse/net dragging data (fish cannot be caught w/o net)
+        print_r($_SESSION['mouse']);
         $targetFish = $_SESSION['randomID']['fish'][0];
         $dxPos = ((round(microtime(true) * 1000) - $_SESSION['checkSuccess']['startTime']) * $pixelsPerSec); //magnitude of change in x position since start of challenge
 

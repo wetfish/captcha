@@ -1,6 +1,7 @@
 function captcha()
 {
     var pixelsPerSec = 50.0; //$pixelsPerSec must equal this number in captcha.php
+    var success = false;
 
     var background = new Image();
     var left = 
@@ -19,18 +20,26 @@ function captcha()
         drag: new Image()
     }
 
+    var intervals = 
+    {
+        tick: null,
+        check: null
+    }
+
     var canvas;
     var context;
+    var captchaDiv = document.getElementById("captcha"); //find <div> block to insert and remove canvas
 
     this.canvasElement = 
     {
         initialize : function()
         {
-            var captchaDiv = document.getElementById("captcha"); //find <div> block to insert canvas
             canvas = document.createElement("canvas"); //initialize canvas
             canvas.width = 420;
             canvas.height = 240;
             context = canvas.getContext("2d"); //initialize context to draw to
+
+            canvas.setAttribute("id", "canvas");
 
             canvas.setAttribute("onmousemove", "updateCoords(event)"); //tracks mouse position
             canvas.setAttribute("onmousedown", "useNet(event)"); //handles when a user starts to drag net
@@ -40,13 +49,14 @@ function captcha()
 
             canvas.setAttribute("ontouchmove", "updateCoords(event)"); //same as above, but for touch events
             canvas.setAttribute("ontouchstart", "useNet(event)");
-            canvas.setAttribute("ontouchend", "dropNet(event)");
-            canvas.setAttribute("ontouchcancel", "dropNet(event)");
+            canvas.setAttribute("ontouchend", "dropNet(event, false)");
+            canvas.setAttribute("ontouchcancel", "dropNet(event, false)");
             
             captchaDiv.append(canvas); //insert canvas into page
 
             this.lastUpdate = Date.now(); //initialize data for animation loop
-            var tick = setInterval(canvasElement.update, 40); //start animation loop
+            intervals.tick = setInterval(canvasElement.update, 40); //start animation loop
+            intervals.check = setInterval(checkSuccess, 2000); //check if captcha has been completed
         },
         update : function()
         {
@@ -54,8 +64,16 @@ function captcha()
             var dt = now - canvasElement.lastUpdate;
             canvasElement.lastUpdate = now;
 
-            left.x -= 50.0*dt/1000; //update positions of layers
-            right.x += 50.0*dt/1000;
+            if(success)
+            {
+                clearInterval(intervals.check);
+                clearInterval(intervals.tick);
+                captchaDiv.removeChild(document.getElementById("canvas"));
+                captchaDiv.append(document.createTextNode("Success!"));
+            }
+
+            left.x -= pixelsPerSec*dt/1000; //update positions of layers
+            right.x += pixelsPerSec*dt/1000;
 
             if(left.x<=-420){left.x = -1;}
             if(right.x>=420){right.x = 1;}
@@ -76,8 +94,24 @@ function captcha()
         }
     }
 
+    function checkSuccess() 
+    {
+        var successXHR = new XMLHttpRequest(); //request to server to check for a success
+        successXHR.withCredentials = true;
+        successXHR.open('GET', "/captcha.php?x="+user.x+"&y="+user.y+"&net="+user.net, true); //will call captcha.php with user data
+        successXHR.send(); //sends request
+        successXHR.onreadystatechange = function() //listening for response
+        {
+            if (successXHR.readyState == 4 && successXHR.status == 200) //if response is valid
+            {
+                success = successXHR.responseText == "true";
+            }
+        }
+    }
+
     var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
-    challengeXHR.open('GET', "/captcha.php", true); //will call captcha.php with no parameters
+    challengeXHR.withCredentials = true;
+    challengeXHR.open('GET', "/captcha.php?new=\'true\'", true); //will call captcha.php with no parameters
     challengeXHR.send(); //sends request
     challengeXHR.onreadystatechange = function() //listening for response
     {
@@ -93,9 +127,7 @@ function captcha()
         }
     }
 
-    canvasElement.initialize(); //build the challenge
-
-    
+    canvasElement.initialize(); //build the challenge    
 }
 
 var user = 
@@ -123,6 +155,7 @@ function updateCoords(event)
 function useNet(event)
 {
     user.net = true;
+    user.inframe = true;
 }
 
 function dropNet(event, inframe)
