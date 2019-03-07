@@ -52,6 +52,8 @@ function captcha()
             canvas.setAttribute("ontouchstart", "useNet(event)");
             canvas.setAttribute("ontouchend", "dropNet(event, false)");
             canvas.setAttribute("ontouchcancel", "dropNet(event, false)");
+            canvas.setAttribute("ontouchenter", "dropNet(event, false)");
+            canvas.setAttribute("ontouchleave", "dropNet(event, false)");
             
             captchaDiv.append(canvas); //insert canvas into page
 
@@ -96,7 +98,7 @@ function captcha()
         start : function()
         {
             document.getElementById("canvas").removeEventListener("click", canvasElement.start);
-            document.getElementById("canvas").removeEventListener("touchend", canvasElement.start);
+            document.getElementById("canvas").removeEventListener("touchstart", canvasElement.start);
             canvasElement.lastUpdate = Date.now(); //initialize data for animation loop
             intervals.tick = setInterval(canvasElement.update, 34); //start animation loop
             checkSuccess(true); //tells php to start
@@ -163,8 +165,8 @@ function updateCoords(event)
     }
     else
     {
-        user.x = event.touches[0].offsetX;
-        user.Y = event.touches[0].offsetY;
+        user.x = event.touches[0].clientX;
+        user.y = event.touches[0].clientY;
     }
 }
 
