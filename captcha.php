@@ -7,7 +7,10 @@ class captcha
     
     function __construct()
     {   
-        if($_GET['new']) unset($_SESSION['randomID']);
+        if($_GET['new']){
+            unset($_SESSION['randomID']);
+            unset($_SESSION['checkSuccess']);
+        } 
         if(isset($_SESSION['randomID'])) //if session has been created, checks to see if the success condition has been met
         {
             Header("Content-type: text/plain");
@@ -16,7 +19,10 @@ class captcha
                 echo 'true';
                 session_destroy();
             }
-            echo 'false';
+            else
+            {
+                //echo 'false';
+            }
         } 
         else //generates new challenge
         {
@@ -206,36 +212,58 @@ class captcha
     {
         $pixelsPerSec = 50; //corresponds to values (2 px) in capthca.js canvasElement.update() function and maxFPS (25fps)
 
-        if(!isset($_SESSION['mouse']))
+        if(!isset($_SESSION['checkSuccess']))
         {
             $_SESSION['checkSuccess']['successTimer'] = 0; //initialize timer to keep track of how long the success condition has been true
-            $_SESSION['checkSuccess']['startTime'] = round(microtime(true) * 1000);
+            $_SESSION['checkSuccess']['startTime'] = round(microtime(true)*1000);
         }
-        $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y'], 'net' => $_GET['net']]; //retrieve mouse/net dragging data (fish cannot be caught w/o net)
-        print_r($_SESSION['mouse']);
+        $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y']]; //retrieve mouse/net dragging data (fish cannot be caught w/o net)
+        //print_r((round(microtime(true)*1000) - $_SESSION['checkSuccess']['successTimer'])/1000);
         $targetFish = $_SESSION['randomID']['fish'][0];
-        $dxPos = ((round(microtime(true) * 1000) - $_SESSION['checkSuccess']['startTime']) * $pixelsPerSec); //magnitude of change in x position since start of challenge
+        $dxPos = $pixelsPerSec * (round(microtime(true)*1000) - $_SESSION['checkSuccess']['startTime'])/1000; //magnitude of change in x position since start of challenge
 
-        $fishPos = //calculated position of the target fish
-        [
-            'x' => $targetFish['left'] ? $targetFish['x']-$dxPos % 420 : $targetFish['x']+$dxPos % 420, //xPos based on direction fish is moving
-            'y' => $targetFish['y']
-        ];
-
-        if($_SESSION['mouse']['net'] == 'true' //check to see if user has net and is over the target fish
-            && ($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96)
-            && ($_SESSION['mouse']['y'] >= $fishPos['y'] && $_SESSION['mouse']['y']-54 <= $fishPos['y']))
+        if($targetFish['left']) //calculated position of the target fish
         {
-            if($_SESSION['checkSuccess']['successTimer'] == 0){$_SESSION['checkSuccess']['successTimer'] = round(microtime(true) * 1000);} //if first success, start timer
-            elseif(round(microtime(true) * 1000) - $_SESSION['checkSuccess']['successTimer'] >= 2500) //else check timer (challenge success happens at 2.5 seconds)
+            if($targetFish['x']-$dxPos) //xPos based on direction fish is moving
+            {
+                $fishPos['x'] = (($targetFish['x']-$dxPos) % 420) + 420;
+            }
+            else $fishPos['x'] = (($targetFish['x']-$dxPos) % 420);
+        }
+        else $fishPos['x'] = ($targetFish['x']+$dxPos) % 420;
+        $fishPos['y'] = $targetFish['y'];
+
+        //print_r($_SESSION['checkSuccess']['successTimer']);
+        //print_r($fishPos);
+        //print_r($dxPos);
+        //print_r($_SESSION['mouse']);
+
+        //print_r(($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96));
+        //print_r(($fishPos['x']+96 >= 420 && $_SESSION['mouse']['x'] <= 420-$fishPos['x']+96));
+        //print_r(($_SESSION['mouse']['y'] >= $fishPos['y'] && $_SESSION['mouse']['y'] <= $fishPos['y']+54));
+
+        if((($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96) //check to see if user is over the target fish
+                || ($fishPos['x']+96 >= 420 && $_SESSION['mouse']['x'] <= 420-$fishPos['x']+96))
+            && ($_SESSION['mouse']['y'] >= $fishPos['y'] && $_SESSION['mouse']['y'] <= $fishPos['y']+54))
+        {
+            if($_SESSION['checkSuccess']['successTimer'] == 0) //if first success, start timer
+            {
+                $_SESSION['checkSuccess']['successTimer'] = round(microtime(true)*1000);
+            }
+
+            if((round(microtime(true)*1000) - $_SESSION['checkSuccess']['successTimer'])/1000 >= 1.25) //else check timer (challenge success happens at 2 seconds)
             {
                 return true;
             }
-            else return false; //not yet 2.5 seconds, no success
+            else return false; //not yet 2 seconds, no success
         }
-        else{$_SESSION['checkSuccess']['successTimer'] = 0;} //reset timer on fail
+        else
+        {
+            $_SESSION['checkSuccess']['successTimer'] = 0; //reset timer on fail
+            return false; //no success
+        }
 
-        return false; //no success
+        
     }
 }
 

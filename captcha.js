@@ -4,6 +4,7 @@ function captcha()
     var success = false;
 
     var background = new Image();
+    var welcome = new Image();
     var left = 
     {
         layer : new Image(),
@@ -54,9 +55,8 @@ function captcha()
             
             captchaDiv.append(canvas); //insert canvas into page
 
-            this.lastUpdate = Date.now(); //initialize data for animation loop
-            intervals.tick = setInterval(canvasElement.update, 40); //start animation loop
-            intervals.check = setInterval(checkSuccess, 2000); //check if captcha has been completed
+            document.getElementById("canvas").addEventListener("click", canvasElement.start);
+            document.getElementById("canvas").addEventListener("touchend", canvasElement.start); 
         },
         update : function()
         {
@@ -71,42 +71,55 @@ function captcha()
                 captchaDiv.removeChild(document.getElementById("canvas"));
                 captchaDiv.append(document.createTextNode("Success!"));
             }
-
+            
             left.x -= pixelsPerSec*dt/1000; //update positions of layers
             right.x += pixelsPerSec*dt/1000;
 
-            if(left.x<=-420){left.x = -1;}
-            if(right.x>=420){right.x = 1;}
+            if(left.x<=-canvas.width){left.x = -1;}
+            if(right.x>=canvas.width){right.x = 1;}
+            
 
             context.drawImage(background, 0, 0); //draw all layers
 
-            context.drawImage(left.layer, -left.x, 0, 420+left.x, 240, 0, 0, 420+left.x, 240);
-            context.drawImage(left.layer, 0, 0, -left.x, 240, 420+left.x, 0, -left.x, 240);
+            context.drawImage(left.layer, -left.x, 0, canvas.width+left.x, canvas.height, 0, 0, canvas.width+left.x, canvas.height);
+            context.drawImage(left.layer, 0, 0, -left.x, canvas.height, canvas.width+left.x, 0, -left.x, canvas.height);
 
-            context.drawImage(right.layer, 420-right.x, 0, right.x, 240, 0, 0, right.x, 240);
-            context.drawImage(right.layer, 0, 0, 420-right.x, 240, right.x, 0, 420-right.x, 240);
+            context.drawImage(right.layer, canvas.width-right.x, 0, right.x, canvas.height, 0, 0, right.x, canvas.height);
+            context.drawImage(right.layer, 0, 0, canvas.width-right.x, canvas.height, right.x, 0, canvas.width-right.x, canvas.height);
 
             if(user.inframe)
             {
                 if(user.net) context.drawImage(nets.drag, user.x-nets.drag.width/2, user.y-nets.drag.height/3);
                 else context.drawImage(nets.loose, user.x-nets.loose.width/2, user.y-nets.drag.height/3);
             }
+        },
+        start : function()
+        {
+            document.getElementById("canvas").removeEventListener("click", canvasElement.start);
+            document.getElementById("canvas").removeEventListener("touchend", canvasElement.start);
+            canvasElement.lastUpdate = Date.now(); //initialize data for animation loop
+            intervals.tick = setInterval(canvasElement.update, 34); //start animation loop
+            checkSuccess(true); //tells php to start
+            intervals.check = setInterval(checkSuccess, 100); //check if captcha has been completed
         }
     }
 
-    function checkSuccess() 
+    function checkSuccess(first) 
     {
-        var successXHR = new XMLHttpRequest(); //request to server to check for a success
-        successXHR.withCredentials = true;
-        successXHR.open('GET', "/captcha.php?x="+user.x+"&y="+user.y+"&net="+user.net, true); //will call captcha.php with user data
-        successXHR.send(); //sends request
-        successXHR.onreadystatechange = function() //listening for response
-        {
-            if (successXHR.readyState == 4 && successXHR.status == 200) //if response is valid
+        if(user.net || first){
+            var successXHR = new XMLHttpRequest(); //request to server to check for a success
+            successXHR.withCredentials = true;
+            successXHR.open('GET', "/captcha.php?x="+user.x+"&y="+user.y, true); //will call captcha.php with user data
+            successXHR.send(); //sends request
+            successXHR.onreadystatechange = function() //listening for response
             {
-                success = successXHR.responseText == "true";
+                if (successXHR.readyState == 4 && successXHR.status == 200) //if response is valid
+                {
+                    success = successXHR.responseText == "true";
+                }
             }
         }
+        
     }
 
     var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
@@ -120,10 +133,13 @@ function captcha()
             var response = JSON.parse(challengeXHR.responseText); //parse response as a json
             
             background.src = response.background; //extract image data from parsed json
+            welcome.src = response.welcome;
             left.layer.src = response.left;
             right.layer.src = response.right;
             nets.loose.src = response.loose;
             nets.drag.src = response.drag;
+
+            context.drawImage(welcome, 0, 0);
         }
     }
 
