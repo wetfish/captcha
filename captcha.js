@@ -13,9 +13,9 @@ function captcha()
     var right = 
     {
         layer: new Image(),
-        x : 0
+        x : 0 //x pos of bottom-leftmost pixel of layer
     };
-    var nets = 
+    var net = 
     {
         loose: new Image(),
         drag: new Image()
@@ -73,15 +73,16 @@ function captcha()
                 captchaDiv.removeChild(document.getElementById("canvas"));
                 captchaDiv.append(document.createTextNode("Success!"));
             }
-            
-            left.x -= pixelsPerSec*dt/1000; //update positions of layers
+
+            //update positions of layers
+            left.x -= pixelsPerSec*dt/1000; 
             right.x += pixelsPerSec*dt/1000;
 
             if(left.x<=-canvas.width){left.x = -1;}
             if(right.x>=canvas.width){right.x = 1;}
             
-
-            context.drawImage(background, 0, 0); //draw all layers
+            //draw all layers
+            context.drawImage(background, 0, 0); 
 
             context.drawImage(left.layer, -left.x, 0, canvas.width+left.x, canvas.height, 0, 0, canvas.width+left.x, canvas.height);
             context.drawImage(left.layer, 0, 0, -left.x, canvas.height, canvas.width+left.x, 0, -left.x, canvas.height);
@@ -89,10 +90,11 @@ function captcha()
             context.drawImage(right.layer, canvas.width-right.x, 0, right.x, canvas.height, 0, 0, right.x, canvas.height);
             context.drawImage(right.layer, 0, 0, canvas.width-right.x, canvas.height, right.x, 0, canvas.width-right.x, canvas.height);
 
-            if(user.inframe)
+            //draw net
+            if(user.inFrame)
             {
-                if(user.net) context.drawImage(nets.drag, user.x-nets.drag.width/2, user.y-nets.drag.height/3);
-                else context.drawImage(nets.loose, user.x-nets.loose.width/2, user.y-nets.drag.height/3);
+                if(user.usingNet) context.drawImage(net.drag, user.x-net.drag.width/2, user.y-net.drag.height/3);
+                else context.drawImage(net.loose, user.x-net.loose.width/2, user.y-net.drag.height/3);
             }
         },
         start : function()
@@ -108,7 +110,7 @@ function captcha()
 
     function checkSuccess(first) 
     {
-        if(user.net || first){
+        if(user.usingNet || first){
             var successXHR = new XMLHttpRequest(); //request to server to check for a success
             successXHR.withCredentials = true;
             successXHR.open('GET', "/captcha.php?x="+user.x+"&y="+user.y, true); //will call captcha.php with user data
@@ -134,12 +136,13 @@ function captcha()
         {
             var response = JSON.parse(challengeXHR.responseText); //parse response as a json
             
+            //TODO: make all but left and right be retrieved from webpage
             background.src = response.background; //extract image data from parsed json
             welcome.src = response.welcome;
             left.layer.src = response.left;
             right.layer.src = response.right;
-            nets.loose.src = response.loose;
-            nets.drag.src = response.drag;
+            net.loose.src = response.loose;
+            net.drag.src = response.drag;
 
             context.drawImage(welcome, 0, 0);
         }
@@ -150,10 +153,10 @@ function captcha()
 
 var user = 
 {
-    inframe : false,
+    inFrame : false,
     x : 0,
     y : 0,
-    net : false //is user dragging net
+    usingNet : false //is user dragging net
 }
 
 function updateCoords(event)
@@ -172,12 +175,12 @@ function updateCoords(event)
 
 function useNet(event)
 {
-    user.net = true;
-    user.inframe = true;
+    user.usingNet = true;
+    user.inFrame = true;
 }
 
 function dropNet(event, inframe)
 {
-    user.net = false;
-    user.inframe = inframe;
+    user.usingNet = false;
+    user.inFrame = inframe;
 }
