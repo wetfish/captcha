@@ -4,26 +4,22 @@ $captcha = new captcha();
 
 class captcha
 {
-    
     function __construct()
     {   
         if($_GET['new']){
+            unset($_SESSION['captchaSuccess']);
             unset($_SESSION['randomID']);
             unset($_SESSION['checkSuccess']);
-        } 
+        }
         if(isset($_SESSION['randomID'])) //if session has been created, checks to see if the success condition has been met
         {
             Header("Content-type: text/plain");
             if($this->checkSuccess())
             {
                 echo 'true';
-                session_destroy();
+                $_SESSION['captchaSuccess']=true;
             }
-            else
-            {
-                //echo 'false';
-            }
-        } 
+        }
         else //generates new challenge
         {
             $_SESSION['randomID']=$this->generateID();
@@ -39,7 +35,7 @@ class captcha
     //generates a new and 'unique' random fish
     private function generateFish()
     {
-        $traits = array('striped', 'dead', 'backwards', 'none');
+        $traits = array('striped', 'dead', 'normal');
         $fishData = array('trait' => $traits[array_rand($traits)], 'x' => rand(0,324), 'y' => rand(2,120), 'left' => (bool)rand(0,1));
         
         while($fishData['trait'] === $_SESSION['randomID']['challenge'])
@@ -80,7 +76,7 @@ class captcha
     //generates randomID/captcha challenge
     private function generateID()
     {
-        $challenges = array('striped', 'dead', 'backwards');
+        $challenges = array('striped', 'dead', 'trout');
         $challenge = $challenges[array_rand($challenges)];
         $generatedID = //instantiate the random data for the captcha
         [
@@ -174,7 +170,7 @@ class captcha
         $fish_height = 54;
         switch($fishy['trait'])
         {
-            case 'none':
+            case 'normal':
                 imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 break;
             case 'striped':
@@ -189,11 +185,11 @@ class captcha
                 imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 break;
-            case 'backwards':
-                imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
-                imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
-                imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
-                break;
+            // case 'backwards':
+            //     imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
+            //     imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+            //     imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
+            //     break;
         }
     }
 
