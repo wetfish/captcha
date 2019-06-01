@@ -96,24 +96,18 @@ class captcha
     {
         $fishImages = 
         [
-            0 => imagecreatefrompng('./normal.png'),
-            1 => imagecreatefrompng('./stripe.png')
+            0 => imagecreatefrompng('./captcha-assets/normal.png'),
+            1 => imagecreatefrompng('./captcha-assets/stripe.png')
         ];
         $layers = 
         [
-            0 => imagecreatefrompng('./bglayer.png'),
+            0 => imagecreatefrompng('./captcha-assets/bglayer.png'),
             1 => imagecreatetruecolor(420, 240),
             2 => imagecreatetruecolor(420, 240)
         ];
 
         $textColor = imagecolorallocate($layers[0], 160, 15, 150);
-        $font = imagettftext($layers[0], 30, 0, 15, 220, $textColor, './dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
-
-        $nets =
-        [
-            0 => imagecreatefrompng('./net1.png'),
-            1 => imagecreatefrompng('./net2.png')
-        ];
+        $font = imagettftext($layers[0], 30, 0, 15, 220, $textColor, './captcha-assets/dpcomic.ttf', "Catch the " . $_SESSION['randomID']['challenge'] . " fish!");
 
         for($i=1; $i <= 2; $i++) 
         {   
@@ -122,14 +116,6 @@ class captcha
             imagefilledrectangle($layers[$i], 0, 0, 420, 240, $transparency);
             imagealphablending($layers[$i], true);
             imagesavealpha($layers[$i], true);
-
-            imagealphablending($nets[$i-1], false);
-            $transparency = imagecolorallocatealpha($nets[$i-1], 0, 0, 0, 127);
-            $temp = imagecreatefrompng('./net'.$i.'.png');
-            imagefilledrectangle($nets[$i-1], 0, 0, imagesx($nets[$i-1]), imagesy($nets[$i-1]), $transparency);
-            imagealphablending($nets[$i-1], true);
-            imagesavealpha($nets[$i-1], true);
-            imagecopy($nets[$i-1], $temp, 0, 0, 0, 0, imagesx($nets[$i-1]), imagesy($nets[$i-1]));
             
             if($i>1)
             {
@@ -157,9 +143,6 @@ class captcha
             'background' => captcha::getLayerBase64($layers[0]),
             'right' => captcha::getLayerBase64($layers[1]),
             'left' => captcha::getLayerBase64($layers[2]),
-            'welcome' => captcha::getLayerBase64(imagecreatefrompng('./welcome.png')),
-            'loose' => captcha::getLayerBase64($nets[0]),
-            'drag' => captcha::getLayerBase64($nets[1])
         );
         echo json_encode($response_json);
     }
@@ -228,15 +211,6 @@ class captcha
         }
         else $fishPos['x'] = ($targetFish['x']+$dxPos) % 420;
         $fishPos['y'] = $targetFish['y'];
-
-        //print_r($_SESSION['checkSuccess']['successTimer']);
-        //print_r($fishPos);
-        //print_r($dxPos);
-        //print_r($_SESSION['mouse']);
-
-        //print_r(($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96));
-        //print_r(($fishPos['x']+96 >= 420 && $_SESSION['mouse']['x'] <= 420-$fishPos['x']+96));
-        //print_r(($_SESSION['mouse']['y'] >= $fishPos['y'] && $_SESSION['mouse']['y'] <= $fishPos['y']+54));
 
         if((($_SESSION['mouse']['x'] >= $fishPos['x'] && $_SESSION['mouse']['x'] <= $fishPos['x']+96) //check to see if user is over the target fish
                 || ($fishPos['x']+96 >= 420 && $_SESSION['mouse']['x'] <= 420-$fishPos['x']+96))

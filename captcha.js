@@ -1,3 +1,37 @@
+var user = 
+{
+    inFrame : false,
+    x : 0,
+    y : 0,
+    usingNet : false //is user dragging net
+}
+
+function updateCoords(event)
+{
+    if(event.type == 'mousemove') //checks if interaction is with a mouse cursor or touch event
+    {
+        user.x = event.offsetX;
+        user.y = event.offsetY;
+    }
+    else
+    {
+        user.x = event.touches[0].clientX;
+        user.y = event.touches[0].clientY;
+    }
+}
+
+function useNet(event)
+{
+    user.usingNet = true;
+    user.inFrame = true;
+}
+
+function dropNet(event, inframe)
+{
+    user.usingNet = false;
+    user.inFrame = inframe;
+}
+
 function captcha()
 {
     var pixelsPerSec = 50.0; //$pixelsPerSec must equal this number in captcha.php
@@ -5,6 +39,7 @@ function captcha()
 
     var background = new Image();
     var welcome = new Image();
+    var successImg = new Image();
     var left = 
     {
         layer : new Image(),
@@ -40,6 +75,8 @@ function captcha()
             canvas.height = 240;
             context = canvas.getContext("2d"); //initialize context to draw to
 
+            context.drawImage(welcome, 0, 0);
+
             canvas.setAttribute("id", "canvas");
 
             canvas.setAttribute("onmousemove", "updateCoords(event)"); //tracks mouse position
@@ -70,8 +107,7 @@ function captcha()
             {
                 clearInterval(intervals.check);
                 clearInterval(intervals.tick);
-                captchaDiv.removeChild(document.getElementById("canvas"));
-                captchaDiv.append(document.createTextNode("Success!"));
+                context.drawImage(successImg, canvas.width/2-successImg.width/2, canvas.height/2-successImg.height/2);
             }
 
             //update positions of layers
@@ -108,6 +144,52 @@ function captcha()
         }
     }
 
+    initialize();
+
+    function initialize()
+    {
+        //retrieve known image data
+        welcome.src = retrieveAssetBase64("welcome.png");
+        successImg.src = retrieveAssetBase64("success.png");
+        net.loose.src = retrieveAssetBase64("net1.png");
+        net.drag.src = retrieveAssetBase64("net2.png");
+        
+        //retrieve generated image data
+        var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
+        challengeXHR.withCredentials = true;
+        challengeXHR.open('GET', "/captcha.php?new=\'true\'", true); //will call captcha.php with no parameters
+        challengeXHR.send(); //sends request
+        challengeXHR.onreadystatechange = function() //listening for response
+        {
+            if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
+            {
+                var response = JSON.parse(challengeXHR.responseText); //parse response as a json
+            
+                background.src = response.background; //extract image data from parsed json
+                left.layer.src = response.left;
+                right.layer.src = response.right;
+            }
+        }
+        
+        canvasElement.initialize(); //build the challenge
+    }
+    
+    function retrieveAssetBase64(assetName)
+    {
+        var xhr = new XMLHttpRequest(); //initial request to server to generate and begin challenge
+        xhr.withCredentials = true;
+        xhr.open('GET', "/captcha-assets/"+assetName, true); //http request for image
+        xhr.send(); //sends request
+        xhr.onreadystatechange = function() //listening for response
+        {
+            if (xhr.readyState == 4 && xhr.status == 200) //if response is valid
+            {
+                //returns data url for image in base 64
+                return "data+"+xhr.getResponseHeader("Content-Type")+";base64," + btoa(String.fromCharCode.apply(null, new Uint8Array(xhr.response)));
+            }
+        }
+    }
+
     function checkSuccess(first) 
     {
         if(user.usingNet || first){
@@ -125,62 +207,4 @@ function captcha()
         }
         
     }
-
-    var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
-    challengeXHR.withCredentials = true;
-    challengeXHR.open('GET', "/captcha.php?new=\'true\'", true); //will call captcha.php with no parameters
-    challengeXHR.send(); //sends request
-    challengeXHR.onreadystatechange = function() //listening for response
-    {
-        if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
-        {
-            var response = JSON.parse(challengeXHR.responseText); //parse response as a json
-            
-            //TODO: make all but left and right be retrieved from webpage
-            background.src = response.background; //extract image data from parsed json
-            welcome.src = response.welcome;
-            left.layer.src = response.left;
-            right.layer.src = response.right;
-            net.loose.src = response.loose;
-            net.drag.src = response.drag;
-
-            context.drawImage(welcome, 0, 0);
-        }
-    }
-
-    canvasElement.initialize(); //build the challenge    
-}
-
-var user = 
-{
-    inFrame : false,
-    x : 0,
-    y : 0,
-    usingNet : false //is user dragging net
-}
-
-function updateCoords(event)
-{
-    if(event.type == 'mousemove') //checks if interaction is with a mouse cursor or touch event
-    {
-        user.x = event.offsetX;
-        user.y = event.offsetY;
-    }
-    else
-    {
-        user.x = event.touches[0].clientX;
-        user.y = event.touches[0].clientY;
-    }
-}
-
-function useNet(event)
-{
-    user.usingNet = true;
-    user.inFrame = true;
-}
-
-function dropNet(event, inframe)
-{
-    user.usingNet = false;
-    user.inFrame = inframe;
 }
