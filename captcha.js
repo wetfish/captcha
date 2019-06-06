@@ -74,6 +74,11 @@ function captcha()
             canvas.width = 420;
             canvas.height = 240;
             context = canvas.getContext("2d"); //initialize context to draw to
+            
+            //debugging info, temporary
+            console.log(welcome.src);
+            console.log(welcome.width+', '+welcome.height);
+            //
 
             context.drawImage(welcome, 0, 0);
 
@@ -105,9 +110,10 @@ function captcha()
 
             if(success)
             {
+                context.drawImage(successImg, canvas.width/2-successImg.width/2, canvas.height/2-successImg.height/2);
                 clearInterval(intervals.check);
                 clearInterval(intervals.tick);
-                context.drawImage(successImg, canvas.width/2-successImg.width/2, canvas.height/2-successImg.height/2);
+                
             }
 
             //update positions of layers
@@ -144,50 +150,74 @@ function captcha()
         }
     }
 
-    initialize();
+    initialize(); 
 
-    function initialize()
+    async function initialize()
     {
-        //retrieve known image data
-        welcome.src = retrieveAssetBase64("welcome.png");
-        successImg.src = retrieveAssetBase64("success.png");
-        net.loose.src = retrieveAssetBase64("net1.png");
-        net.drag.src = retrieveAssetBase64("net2.png");
-        
         //retrieve generated image data
-        var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
-        challengeXHR.withCredentials = true;
-        challengeXHR.open('GET', "/captcha.php?new=\'true\'", true); //will call captcha.php with no parameters
-        challengeXHR.send(); //sends request
-        challengeXHR.onreadystatechange = function() //listening for response
+        var retrieveChallenge = new Promise(function()
         {
-            if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
+            var challengeXHR = new XMLHttpRequest(); //initial request to server to generate and begin challenge
+            challengeXHR.withCredentials = true;
+            challengeXHR.open('GET', "/captcha.php?new='true'", true); //will call captcha.php with no parameters
+            challengeXHR.send(); //sends request
+            challengeXHR.onreadystatechange = function() //listening for response
             {
-                var response = JSON.parse(challengeXHR.responseText); //parse response as a json
+                if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
+                {
+                    var response = JSON.parse(challengeXHR.responseText); //parse response as a json
             
-                background.src = response.background; //extract image data from parsed json
-                left.layer.src = response.left;
-                right.layer.src = response.right;
+                    background.src = response.background; //extract image data from parsed json
+                    left.layer.src = response.left;
+                    right.layer.src = response.right;
+                    challengeXHR.abort;
+                }
             }
-        }
-        
-        canvasElement.initialize(); //build the challenge
-    }
-    
-    function retrieveAssetBase64(assetName)
-    {
-        var xhr = new XMLHttpRequest(); //initial request to server to generate and begin challenge
-        xhr.withCredentials = true;
-        xhr.open('GET', "/captcha-assets/"+assetName, true); //http request for image
-        xhr.send(); //sends request
-        xhr.onreadystatechange = function() //listening for response
-        {
-            if (xhr.readyState == 4 && xhr.status == 200) //if response is valid
+            
+        });
+
+        //retrieve known image data
+        Promise.all
+        ([
+            Promise.all([
+                retrieveAsset("welcome.png"),
+                retrieveAsset("success.png"),
+                retrieveAsset("net1.png"),
+                retrieveAsset("net2.png")
+            ])
+            .then(function(blobs)
             {
-                //returns data url for image in base 64
-                return "data+"+xhr.getResponseHeader("Content-Type")+";base64," + btoa(String.fromCharCode.apply(null, new Uint8Array(xhr.response)));
-            }
-        }
+                welcome.src = blobs[0];
+                successImg.src = blobs[1];
+                net.loose.src = blobs[2];
+                net.drag.src = blobs[3];
+                console.log(welcome.width+', '+welcome.height);
+            })
+        ])
+        .then(function()
+        {
+            retrieveChallenge;
+            canvasElement.initialize();//build the challenge
+
+        })
+        .catch(function(){ console.log("initialization failed"); });
+    }
+
+    function retrieveAsset(assetName)
+    {
+        //BUG: BLOB URL LEADS NOWHERE?
+        var request = new Request('captcha-assets/'+assetName);
+        
+        return fetch(request)
+        .then(function(response)
+        {
+            return response.blob();
+        })
+        .then(function(blob)
+        {
+            console.log(assetName);
+            return URL.createObjectURL(blob);
+        });
     }
 
     function checkSuccess(first) 
