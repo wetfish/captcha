@@ -177,28 +177,24 @@ function captcha()
         });
 
         //retrieve known image data
-        Promise.all
-        ([
-            Promise.all([
-                retrieveAsset("welcome.png"),
-                retrieveAsset("success.png"),
-                retrieveAsset("net1.png"),
-                retrieveAsset("net2.png")
-            ])
-            .then(function(blobs)
-            {
-                welcome.src = blobs[0];
-                successImg.src = blobs[1];
-                net.loose.src = blobs[2];
-                net.drag.src = blobs[3];
-                console.log(welcome.width+', '+welcome.height);
-            })
+        Promise.all([
+            retrieveAsset("welcome.png"),
+            retrieveAsset("success.png"),
+            retrieveAsset("net1.png"),
+            retrieveAsset("net2.png")
         ])
+        .then(function(blobs)
+        {
+            welcome.src = blobs[0];
+            successImg.src = blobs[1];
+            net.loose.src = blobs[2];
+            net.drag.src = blobs[3];
+            console.log(welcome.width+', '+welcome.height);
+        })
         .then(function()
         {
-            retrieveChallenge;
-            canvasElement.initialize();//build the challenge
-
+            retrieveChallenge; //TODO: figure out why adding this to a promise chain freezes the chain, despite appearing to complete successfully
+            canvasElement.initialize(); //build the challenge
         })
         .catch(function(){ console.log("initialization failed"); });
     }
@@ -235,6 +231,5 @@ function captcha()
                 }
             }
         }
-        
     }
 }
