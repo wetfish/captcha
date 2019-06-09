@@ -43,12 +43,12 @@ function captcha()
     var left = 
     {
         layer : new Image(),
-        x : 0 //x pos of bottom-leftmost pixel of layer
+        x : 0 //x pos of top-leftmost pixel of layer
     };
     var right = 
     {
         layer: new Image(),
-        x : 0 //x pos of bottom-leftmost pixel of layer
+        x : 0 //x pos of top-leftmost pixel of layer
     };
     var net = 
     {
@@ -101,14 +101,6 @@ function captcha()
             var dt = now - canvasElement.lastUpdate;
             canvasElement.lastUpdate = now;
 
-            if(success)
-            {
-                context.drawImage(successImg, canvas.width/2-successImg.width/2, canvas.height/2-successImg.height/2);
-                clearInterval(intervals.check);
-                clearInterval(intervals.tick);
-                
-            }
-
             //update positions of layers
             left.x -= pixelsPerSec*dt/1000; 
             right.x += pixelsPerSec*dt/1000;
@@ -130,6 +122,14 @@ function captcha()
             {
                 if(user.usingNet) context.drawImage(net.drag, user.x-net.drag.width/2, user.y-net.drag.height/3);
                 else context.drawImage(net.loose, user.x-net.loose.width/2, user.y-net.drag.height/3);
+            }
+
+            if(success)
+            {
+                context.drawImage(successImg, canvas.width/2-successImg.width/2, canvas.height/2-successImg.height/2);
+                clearInterval(intervals.check);
+                clearInterval(intervals.tick);
+                
             }
         },
         start : function()
@@ -203,7 +203,6 @@ function captcha()
         })
         .then(function(blob)
         {
-            console.log(assetName);
             return URL.createObjectURL(blob);
         });
     }
