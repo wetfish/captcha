@@ -76,7 +76,7 @@ class captcha
     //generates randomID/captcha challenge
     private function generateID()
     {
-        $challenges = array('striped', 'dead', 'trout');
+        $challenges = array('striped', 'dead');
         $challenge = $challenges[array_rand($challenges)];
         $generatedID = //instantiate the random data for the captcha
         [
@@ -159,20 +159,15 @@ class captcha
             case 'striped':
                 imagecopy($layer, $fishImages[1], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 break;
-            case 'big':
-                imagecopyresized($layers, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0,
-                floor($fish_height*1.5), floor($fish_height*1.5),$fish_width, $fish_height);
-                break;
+            // case 'big':
+            //     imagecopyresized($layers, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0,
+            //     floor($fish_height*1.5), floor($fish_height*1.5),$fish_width, $fish_height);
+            //     break;
             case 'dead':
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 break;
-            // case 'backwards':
-            //     imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
-            //     imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
-            //     imageflip($fishImages[0], IMG_FLIP_HORIZONTAL);
-            //     break;
         }
     }
 

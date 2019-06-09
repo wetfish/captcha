@@ -74,13 +74,6 @@ function captcha()
             canvas.width = 420;
             canvas.height = 240;
             context = canvas.getContext("2d"); //initialize context to draw to
-            
-            //debugging info, temporary
-            console.log(welcome.src);
-            console.log(welcome.width+', '+welcome.height);
-            //
-
-            context.drawImage(welcome, 0, 0);
 
             canvas.setAttribute("id", "canvas");
 
@@ -189,19 +182,18 @@ function captcha()
             successImg.src = blobs[1];
             net.loose.src = blobs[2];
             net.drag.src = blobs[3];
-            console.log(welcome.width+', '+welcome.height);
         })
         .then(function()
         {
             retrieveChallenge; //TODO: figure out why adding this to a promise chain freezes the chain, despite appearing to complete successfully
-            canvasElement.initialize(); //build the challenge
+            canvasElement.initialize(); //buildda the challenge
+            welcome.onload = function(){ context.drawImage(welcome, 0, 0); };
         })
-        .catch(function(){ console.log("initialization failed"); });
+        .catch(function(error){ console.log(error); });
     }
 
     function retrieveAsset(assetName)
     {
-        //BUG: BLOB URL LEADS NOWHERE?
         var request = new Request('captcha-assets/'+assetName);
         
         return fetch(request)
