@@ -15,13 +15,13 @@ Simply go to the location the files for your website are stored (i.e. /var/www/c
 ```
 $ git clone https://github.com/wetfish/captcha.git
 ```
-This will download all the files necessary to run the captcha. 
+This will download all the files necessary to run the captcha into their correct places.
 
 Note: The location these files are stored should match the 'root' file path in your website's nginx configuration. 
-(i.e. /etc/nginx/conf.d/<your website>.conf for CentOS 7)
+(i.e. /etc/nginx/conf.d/'your website'.conf for CentOS 7)
 
 ### NGINX Setup
-Assuming the rest of your website is already configured for nginx, adding the following block to your server config will enable your site to run the php necessary for the captcha.
+Assuming the rest of your website is already configured for nginx, adding the following block to your server's config will enable your site to run the php necessary for the captcha.
 
 ```
     location ~ \.php$ {
@@ -38,7 +38,7 @@ At the top of the webpage's HTML file, simply add:
 ```html
 <script type="text/javascript" src="captcha.js"></script>
 ```
-Your <body> tag should look like this:
+Your <body> tag should look something like this:
 ```html
 <body onload="captcha()">
 ```
@@ -47,6 +47,7 @@ Then on the place in the page you would like the captcha add:
 ```html
 <div id="captcha"></div>
 ```
+The script will look for this block and insert the captcha into it.
 
 ### Detecting captcha success
-Upon a successful completion of the captcha by a user, the 'captchaSuccess' session variable will be set to TRUE. You can use your own php logic to watch for this.
+Upon a successful completion of the captcha by a user, the 'captchaSuccess' session variable will be set to TRUE. You can use your own php logic to watch for this and react accordingly (i.e. allow a form submission, sing happy birthday, etc).
