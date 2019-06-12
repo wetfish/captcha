@@ -34,7 +34,7 @@ function dropNet(event, inframe) //UI trigger for not clicking and leaving canva
 
 function captcha() //the actual captcha 'class' 
 {
-    var pixelsPerSec = 50.0; //$pixelsPerSec must equal this number in captcha.php
+    var pixelsPerSec = 65.0; //$pixelsPerSec must equal this number in captcha.php
     var success = false; //if true, triggers success state on next update
     var failTimeout = 15000; //timeout in milliseconds
     var fail = false; //if true, triggers fail state on next update

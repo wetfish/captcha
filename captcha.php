@@ -76,14 +76,13 @@ class captcha
     //generates randomID/captcha challenge
     private function generateID()
     {
-        $challenges = array('striped', 'dead');
+        $challenges = array('striped', 'dead', 'dark', 'cool');
         $challenge = $challenges[array_rand($challenges)];
         $generatedID = //instantiate the random data for the captcha
         [
             'challenge' => $challenge,
             'generated_at' => date('m/d/Y h:i:s', time()),
             'fish' => array(
-            
                 ['trait' => $challenge, 'x' => rand(0,324), 'y' => rand(2,120), 'left' => (bool)rand(0,1)]
             )
         ];
@@ -97,7 +96,9 @@ class captcha
         $fishImages = 
         [
             0 => imagecreatefrompng('./captcha-assets/normal.png'),
-            1 => imagecreatefrompng('./captcha-assets/stripe.png')
+            1 => imagecreatefrompng('./captcha-assets/stripe.png'),
+            2 => imagecreatefrompng('./captcha-assets/dark.png'),
+            3 => imagecreatefrompng('./captcha-assets/cool.png')
         ];
         $layers = 
         [
@@ -159,14 +160,16 @@ class captcha
             case 'striped':
                 imagecopy($layer, $fishImages[1], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 break;
-            // case 'big':
-            //     imagecopyresized($layers, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0,
-            //     floor($fish_height*1.5), floor($fish_height*1.5),$fish_width, $fish_height);
-            //     break;
             case 'dead':
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
                 imagecopy($layer, $fishImages[0], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 imageflip($fishImages[0], IMG_FLIP_VERTICAL);
+                break;
+            case 'dark':
+                imagecopy($layer, $fishImages[2], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
+                break;
+            case 'cool':
+                imagecopy($layer, $fishImages[3], $fishy['x'], $fishy['y'], 0, 0, $fish_width, $fish_height);
                 break;
         }
     }
@@ -184,16 +187,15 @@ class captcha
     //returns true if user has dragged net and held over success fish for at least 3 seconds
     private function checkSuccess()
     {
-        $pixelsPerSec = 50; //corresponds to values (2 px) in capthca.js canvasElement.update() function and maxFPS (25fps)
+        $pixelsPerSec = 65; //corresponds to pixelsPerSec in captcha.js
 
         if(!isset($_SESSION['checkSuccess']))
         {
             $_SESSION['checkSuccess']['successTimer'] = 0; //initialize timer to keep track of how long the success condition has been true
-            $_SESSION['checkSuccess']['startTime'] = round(microtime(true)*1000);
+            $_SESSION['checkSuccess']['startTime'] = round(microtime(true)*1000); //record time challenge started
         }
-        $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y']]; //retrieve mouse/net dragging data (fish cannot be caught w/o net)
-        //print_r((round(microtime(true)*1000) - $_SESSION['checkSuccess']['successTimer'])/1000);
-        $targetFish = $_SESSION['randomID']['fish'][0];
+        $_SESSION['mouse'] = ['x' => $_GET['x'], 'y' => $_GET['y']]; //retrieve mouse data
+        $targetFish = $_SESSION['randomID']['fish'][0]; //correct fish is always 1st in the array
         $dxPos = $pixelsPerSec * (round(microtime(true)*1000) - $_SESSION['checkSuccess']['startTime'])/1000; //magnitude of change in x position since start of challenge
 
         if($targetFish['left']) //calculated position of the target fish
