@@ -47,3 +47,6 @@ Then on the place in the page you would like the captcha add:
 ```html
 <div id="captcha"></div>
 ```
+
+### Detecting captcha success
+Upon a successful completion of the captcha by a user, the 'captchaSuccess' session variable will be set to TRUE. You can use your own php logic to watch for this.
