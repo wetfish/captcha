@@ -34,8 +34,8 @@ Assuming the rest of your website is already configured for nginx, adding the fo
 ```
 If you haven't already, you will need to open up the appropriate tcp port for NGINX in firewalld.
 ```
-    $ sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
-    $ sudo firewall-cmd --reload
+$ sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
+$ sudo firewall-cmd --reload
 ```
 
 ### Adding the captcha element to a webpage
