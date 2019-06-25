@@ -11,7 +11,7 @@ To run the captcha you will need:
 * NGINX (this has not yet been tested on Apache, though it should work just as well)
 
 ### Downloading the captcha
-Simply go to the location the files for your website are stored (i.e. /var/www/captcha) and run: 
+Simply go to the location the files for your website are stored (i.e. /var/www and run: 
 ```
 $ git clone https://github.com/wetfish/captcha.git
 ```
