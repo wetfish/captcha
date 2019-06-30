@@ -36,7 +36,7 @@ function captcha() //the actual captcha 'class'
 {
     var pixelsPerSec = 65.0; //$pixelsPerSec must equal this number in captcha.php
     var success = false; //if true, triggers success state on next update
-    var failTimeout = 15000; //timeout in milliseconds
+    var failTimeout = 10000; //timeout in milliseconds
     var fail = false; //if true, triggers fail state on next update
 
     var background = new Image(); //initialize image data
@@ -220,11 +220,9 @@ function captcha() //the actual captcha 'class'
             if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
             {
                 var response = JSON.parse(challengeXHR.responseText); //parse response as a json
-        
                 background.src = response.background; //extract image data from parsed json
                 left.layer.src = response.left;
                 right.layer.src = response.right;
-                challengeXHR.abort;
             }
         }   
     }
