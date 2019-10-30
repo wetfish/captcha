@@ -1,0 +1,1 @@
+/home/wood/Programming/captcha/captcha.js
