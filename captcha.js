@@ -37,6 +37,7 @@ function captcha() //the actual captcha 'class'
     var pixelsPerSec = 65.0; //$pixelsPerSec must equal this number in captcha.php
     var success = false; //if true, triggers success state on next update
     var failTimeout = 10000; //timeout in milliseconds
+    var printInstructions = true; //if true, will insert plaintext instructions beneath captcha
     var fail = false; //if true, triggers fail state on next update
 
     var background = new Image(); //initialize image data
@@ -95,6 +96,11 @@ function captcha() //the actual captcha 'class'
             canvas.setAttribute("ontouchleave", "dropNet(event, false)");
             
             captchaDiv.append(canvas); //insert canvas into page
+            if(printInstructions) //insert instructions into page conditionally
+            {
+                captchaDiv.appendChild(
+                    document.createTextNode("<p>Click and hold cursor on fish for 2 seconds to pass captcha!</p>"));
+            }
 
             document.getElementById("canvas").addEventListener("click", canvasElement.start);
             document.getElementById("canvas").addEventListener("touchend", canvasElement.start); 
@@ -217,7 +223,7 @@ function captcha() //the actual captcha 'class'
         challengeXHR.send(); //sends request
         challengeXHR.onreadystatechange = function() //listening for response
         {
-            if (challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
+            if(challengeXHR.readyState == 4 && challengeXHR.status == 200) //if response is valid
             {
                 var response = JSON.parse(challengeXHR.responseText); //parse response as a json
                 background.src = response.background; //extract image data from parsed json
@@ -236,7 +242,7 @@ function captcha() //the actual captcha 'class'
             successXHR.send(); //sends request
             successXHR.onreadystatechange = function() //listening for response
             {
-                if (successXHR.readyState == 4 && successXHR.status == 200) //if response is valid
+                if(successXHR.readyState == 4 && successXHR.status == 200) //if response is valid
                 {
                     success = successXHR.responseText == "true"; //checks for success response from server
                 }
