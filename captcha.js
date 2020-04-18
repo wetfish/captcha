@@ -35,9 +35,11 @@ function dropNet(event, inframe) //UI trigger for not clicking and leaving canva
 function captcha() //the actual captcha 'class' 
 {
     var pixelsPerSec = 65.0; //$pixelsPerSec must equal this number in captcha.php
-    var success = false; //if true, triggers success state on next update
     var failTimeout = 10000; //timeout in milliseconds
     var printInstructions = true; //if true, will insert plaintext instructions beneath captcha
+    //success and fail have separate flags due to the intermediate state while the user is completing the captcha
+    //this is intentional, don't @ me
+    var success = false; //if true, triggers success state on next update
     var fail = false; //if true, triggers fail state on next update
 
     var background = new Image(); //initialize image data
@@ -193,7 +195,7 @@ function captcha() //the actual captcha 'class'
         })
         .then(function()
         {
-            retrieveChallenge(); //TODO: figure out why adding this to a promise chain freezes the chain, despite appearing to complete successfully
+            retrieveChallenge();
             canvasElement.initialize(); //build the challenge
             welcome.onload = function(){ context.drawImage(welcome, 0, 0); }; //draws the welcome image
         })
