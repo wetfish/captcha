@@ -6,7 +6,7 @@ class captcha
 {
     function __construct()
     {   
-        if($_GET['new']){
+        if(isset($_SESSION['new'])){
             unset($_SESSION['captchaSuccess']);
             unset($_SESSION['randomID']);
             unset($_SESSION['checkSuccess']);
