@@ -222,7 +222,7 @@ class captcha
             {
                 return true;
             }
-            else return false; //not yet 2 seconds, no success
+            return false; //not yet 2 seconds, no success
         }
         else
         {
