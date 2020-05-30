@@ -101,7 +101,8 @@ function captcha() //the actual captcha 'class'
             if(printInstructions) //insert instructions into page conditionally
             {
                 var instructions = document.createElement('p');
-                instructions.textContent = "Click and hold cursor on fish for 2 seconds to pass captcha!"
+                instructions.textContent = "Click and hold on correct fish for 2 seconds to pass captcha!";
+                instructions.classList.add("captcha_instructions");
                 captchaDiv.appendChild(instructions);
             }
 
