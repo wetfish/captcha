@@ -100,8 +100,10 @@ function captcha() //the actual captcha 'class'
             captchaDiv.append(canvas); //insert canvas into page
             if(printInstructions) //insert instructions into page conditionally
             {
-                captchaDiv.appendChild(
-                    document.createTextNode("<p>Click and hold cursor on fish for 2 seconds to pass captcha!</p>"));
+                var instructions = document.createElement('p');
+                instructions.textContent = "Click and hold on correct fish for 2 seconds to pass captcha!";
+                instructions.classList.add("captcha_instructions");
+                captchaDiv.appendChild(instructions);
             }
 
             document.getElementById("canvas").addEventListener("click", canvasElement.start);
