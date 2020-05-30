@@ -6,7 +6,7 @@ class captcha
 {
     function __construct()
     {   
-        if($_GET['new']){
+        if(isset($_GET['new'])){
             unset($_SESSION['captchaSuccess']);
             unset($_SESSION['randomID']);
             unset($_SESSION['checkSuccess']);
@@ -222,7 +222,7 @@ class captcha
             {
                 return true;
             }
-            else return false; //not yet 2 seconds, no success
+            return false; //not yet 2 seconds, no success
         }
         else
         {

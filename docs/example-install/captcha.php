@@ -1,1 +1,1 @@
-/home/wood/Programming/captcha/captcha.php
+../../captcha.php
