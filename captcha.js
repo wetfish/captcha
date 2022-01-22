@@ -8,6 +8,7 @@ var user = //information for drawing the net
 
 function updateCoords(event) //UI trigger for updating net location
 {
+    event.preventDefault();
     if(event.type == 'mousemove') //checks if interaction is with a mouse cursor or touch event
     {
         user.x = event.offsetX; //mouse movement event
@@ -15,6 +16,7 @@ function updateCoords(event) //UI trigger for updating net location
     }
     else //handles touch events for mobile
     {
+
         user.x = event.touches[0].clientX; //grabs coords for 1st touch point
         user.y = event.touches[0].clientY;
     }
@@ -22,12 +24,17 @@ function updateCoords(event) //UI trigger for updating net location
 
 function useNet(event) //UI trigger for clicking while mouse in canvas
 {
+    event.preventDefault();
+    if (event.type == 'ontouchstart') {
+        updateCoords(event);
+    }
     user.usingNet = true;
     user.inFrame = true;
 }
 
 function dropNet(event, inframe) //UI trigger for not clicking and leaving canvas
 {
+    event.preventDefault();
     user.usingNet = false;
     user.inFrame = inframe;
 }
@@ -106,8 +113,9 @@ function captcha() //the actual captcha 'class'
                 captchaDiv.appendChild(instructions);
             }
 
+            //document.querySelector('#canvas').style.width = '100%';
             document.getElementById("canvas").addEventListener("click", canvasElement.start);
-            document.getElementById("canvas").addEventListener("touchend", canvasElement.start); 
+            document.getElementById("canvas").addEventListener("touchstart", canvasElement.start); 
         },
         update : function()
         {
